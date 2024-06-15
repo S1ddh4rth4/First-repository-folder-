@@ -1,432 +1,209 @@
 import pygame
 import time
-import random
 
-#Definiciones globales
+# Inicialización de Pygame
 pygame.init()
 
-#w = ancho
-#h = alto
-
+# Definiciones globales
 pantallaw = 1000
 pantallah = 1000
 
-#Colores
-fondo = (50,50,50)
-white = (255,255,255)
-marco = (100,100,200)
-vereda = (40,39,39)
-selva = (10,150,10)
-agua = (100,100,230)
+# Colores
+fondo = (50, 50, 50)
+white = (255, 255, 255)
+marco = (100, 100, 200)
+vereda = (40, 39, 39)
+selva = (10, 150, 10)
+agua = (100, 100, 230)
 
-#Resources
-crocki = pygame.image.load('crockicrocki.png')
-carr = pygame.image.load('carr.png')
-carl = pygame.image.load('carl.png')
-tortuga = pygame.image.load('tortugas.png')
-arbol = pygame.image.load('arbol.png')
+# Recursos
+crocki_img = pygame.image.load('crockicrocki.png')
+carr_img = pygame.image.load('carr.png')
+carl_img = pygame.image.load('carl.png')
+tortuga_img = pygame.image.load('tortugas.png')
+arbol_img = pygame.image.load('arbol.png')
 
-crockis = []
-
-areajuego = pygame.display.set_mode((pantallaw,pantallah))
+areajuego = pygame.display.set_mode((pantallaw, pantallah))
 pygame.display.set_caption('Crocki Crocki!')
 
 gametimer = pygame.time.Clock()
 
-def text_objects(text,font):
-    textSurface = font.render(text, True, white)
-    return textSurface, textSurface.get_rect()
 
-def message_display(text,x,y):
-    largetext = pygame.font.Font('freesansbold.ttf',40)
-    TextSurf, TextRect = text_objects(text, largetext)
-    TextRect.center = (x,y)
-    areajuego.blit(TextSurf, TextRect)
+def text_objects(text, font):
+    text_surface = font.render(text, True, white)
+    return text_surface, text_surface.get_rect()
 
-def obj_colisiones(a,jposx,w):
-    if jposx >= a and jposx <= a+w:
+
+def message_display(text, x, y):
+    large_text = pygame.font.Font('freesansbold.ttf', 40)
+    text_surf, text_rect = text_objects(text, large_text)
+    text_rect.center = (x, y)
+    areajuego.blit(text_surf, text_rect)
+
+
+def obj_colisiones(a, jposx, w):
+    if jposx >= a and jposx <= a + w:
         return True
-    elif jposx+50 >= a and jposx+50 <= a+w:
+    elif jposx + 50 >= a and jposx + 50 <= a + w:
         return True
     return False
 
 
-def game_loop():
-#Posiciones Iniciales
-    jposx = 950
-    jposy = 900
+class Game:
+    def __init__(self):
+        self.jposx = 950
+        self.jposy = 900
+        self.puntaje = 0
+        self.ciclos = 5000
+        self.termino = False
+        self.crockis = []
 
-    auto01y = 550
-    auto02y = 600
-    auto03y = 650
-    auto04y = 700
-    auto05y = 750
-    auto06y = 800
-    auto07y = 850
+        self.auto_pos_y = [550, 600, 650, 700, 750, 800, 850]
+        self.agua_pos_y = [100, 150, 200, 250, 300, 350, 400, 450]
 
-    agua01y = 100
-    agua02y = 150
-    agua03y = 200
-    agua04y = 250
-    agua05y = 300
-    agua06y = 350
-    agua07y = 400
-    agua08y = 450
+        self.autos = [
+            [100, 300],
+            [200, 400],
+            [300, 400],
+            [100, 700],
+            [600, 800],
+            [100, 900],
+            [500, 950]
+        ]
 
-    auto01 = [100,300]
-    auto02 = [200,400]
-    auto03 = [300,400]
-    auto04 = [100,700]
-    auto05 = [600,800]
-    auto06 = [100,900]
-    auto07 = [500,950]
+        self.aguas = [
+            [100, 350],
+            [200, 500],
+            [400, 950],
+            [100, 400],
+            [500, 750],
+            [100, 900],
+            [700, 850],
+            [300, 600]
+        ]
 
-    agua01 = [100,350]
-    agua02 = [200,500]
-    agua03 = [400,950]
-    agua04 = [100,400]
-    agua05 = [500,750]
-    agua06 = [100,900]
-    agua07 = [700,850]
-    agua08 = [300,600]
+        self.velocidades = {
+            "g1mx": 7,
+            "g2mx": 4,
+            "g3mx": -4
+        }
 
-    #crockis = []
-
-    g1mx = 7
-    g2mx = 4
-    g3mx = -4
-
-    ciclos = 5000
-    puntaje = 0
-    
-    termino = False
-
-    while not termino:
-        #EVENTOS DEL TECLADO
-        for event in pygame.event.get():
-                    if event.type == pygame.KEYDOWN:
-                        if event.key == pygame.K_0:
-                            termino = True
-                        if event.key == pygame.K_LEFT:
-                            if jposx <= 0:
-                                jposx = 0
-                            else:
-                                jposx = jposx-50
-                            #print("A la izquierda")
-                        elif event.key == pygame.K_RIGHT:
-                            if jposx >= 950:
-                                jposx = 950
-                            else:
-                                jposx = jposx+50
-                            #print("A la derecha")
-                        elif event.key == pygame.K_UP:
-                            if jposy <= 50:
-                                jposy = 50
-                            else:
-                                jposy = jposy-50
-                            #print("A la derecha")
-                        elif event.key == pygame.K_DOWN:
-                            if jposy >= 900:
-                                jposy = 900
-                            else:
-                                jposy = jposy+50
-                            #print("A la derecha")
-
-        #COLISIONES
-        if jposy == 850:
-            for a in auto07:
-                termino = obj_colisiones(a,jposx,50)
-                if termino:
-                    break
-        if jposy == 800:
-            for a in auto06:
-                termino = obj_colisiones(a,jposx,50)
-                if termino:
-                    break
-        if jposy == 750:
-            for a in auto05:
-                termino = obj_colisiones(a,jposx,50)
-                if termino:
-                    break
-        if jposy == 700:
-            for a in auto04:
-                termino = obj_colisiones(a,jposx,50)
-                if termino:
-                    break
-        if jposy == 650:
-            for a in auto03:
-                termino = obj_colisiones(a,jposx,50)
-                if termino:
-                    break
-        if jposy == 600:
-            for a in auto02:
-                termino = obj_colisiones(a,jposx,50)
-                if termino:
-                    break
-        if jposy == 550:
-            for a in auto01:
-                termino = obj_colisiones(a,jposx,50)
-                if termino:
+    def detectar_colisiones(self):
+        if self.jposy in self.auto_pos_y:
+            idx = self.auto_pos_y.index(self.jposy)
+            for a in self.autos[idx]:
+                self.termino = obj_colisiones(a, self.jposx, 50)
+                if self.termino:
                     break
 
-        #COLISIONES EN EL AGUA
-        #COLISIONES
-        notenelagua = False
-
-        if jposy == 450:
-            for a in agua08:
-                notenelagua = obj_colisiones(a,jposx,150)
+        if self.jposy in self.agua_pos_y:
+            idx = self.agua_pos_y.index(self.jposy)
+            notenelagua = False
+            for a in self.aguas[idx]:
+                notenelagua = obj_colisiones(a, self.jposx, 150)
                 if notenelagua:
                     break
             if notenelagua:
-                jposx = jposx + g2mx
+                velocidad = self.velocidades[f"g{idx % 3 + 1}mx"]
+                self.jposx = self.jposx + velocidad
             else:
-                termino = True
-                break
-        if jposy == 400:
-            for a in agua07:
-                notenelagua = obj_colisiones(a,jposx,150)
-                if notenelagua:
-                    break
-            if notenelagua:
-                jposx = jposx + g3mx
-            else:
-                termino = True
-                break
-        if jposy == 350:
-            for a in agua06:
-                notenelagua = obj_colisiones(a,jposx,150)
-                if notenelagua:
-                    break
-            if notenelagua:
-                jposx = jposx + g1mx
-            else:
-                termino = True
-                break
-        if jposy == 300:
-            for a in agua05:
-                notenelagua = obj_colisiones(a,jposx,150)
-                if notenelagua:
-                    break
-            if notenelagua:
-                jposx = jposx + g3mx
-            else:
-                termino = True
-                break
-        if jposy == 250:
-            for a in agua04:
-                notenelagua = obj_colisiones(a,jposx,150)
-                if notenelagua:
-                    break
-            if notenelagua:
-                jposx = jposx + g1mx
-            else:
-                termino = True
-                break
-        if jposy == 200:
-            for a in agua03:
-                notenelagua = obj_colisiones(a,jposx,150)
-                if notenelagua:
-                    break
-            if notenelagua:
-                jposx = jposx + g3mx
-            else:
-                termino = True
-                break
-        if jposy == 150:
-            for a in agua02:
-                notenelagua = obj_colisiones(a,jposx,150)
-                if notenelagua:
-                    break
-            if notenelagua:
-                jposx = jposx + g2mx
-            else:
-                termino = True
-                break
-        if jposy == 100:
-            for a in agua01:
-                notenelagua = obj_colisiones(a,jposx,150)
-                if notenelagua:
-                    break
-            if notenelagua:
-                jposx = jposx + g3mx
-            else:
-                termino = True
-                break
+                self.termino = True
 
-        #LLEGADA A LA META
-        if jposy == 50:
-            puntaje = puntaje + 20000
-            jposy = 900
-            crockis.append(jposx)
+    def actualizar_posiciones(self):
+        for i in range(len(self.autos)):
+            for j in range(len(self.autos[i])):
+                if self.autos[i][j] >= 990:
+                    self.autos[i][j] = 0
+                else:
+                    self.autos[i][j] += self.velocidades[f"g{i % 3 + 1}mx"]
 
-        #MOVIMIENTOS
-        #Autos
-        for x in range(0,len(auto01)):
-            if auto01[x] >= 990:
-                auto01[x] = 0
-            else:
-                auto01[x] = (auto01[x] + g1mx)
-        for x in range(0,len(auto02)):
-            if auto02[x] <= 0:
-                auto02[x] = 990
-            else:
-                auto02[x] = (auto02[x] + g3mx)
-        for x in range(0,len(auto03)):
-            if auto03[x] <= 0:
-                auto03[x] = 990
-            else:
-                auto03[x] = (auto03[x] + g3mx)
-        for x in range(0,len(auto04)):
-            if auto04[x] >= 990:
-                auto04[x] = 0
-            else:
-                auto04[x] = (auto04[x] + g1mx)
-        for x in range(0,len(auto05)):
-            if auto05[x] >= 990:
-                auto05[x] = 0
-            else:
-                auto05[x] = (auto05[x] + g2mx)
-        for x in range(0,len(auto06)):
-            if auto06[x] <= 0:
-                auto06[x] = 990
-            else:
-                auto06[x] = (auto06[x] + g3mx)
-        for x in range(0,len(auto07)):
-            if auto07[x] >= 990:
-                auto07[x] = 0
-            else:
-                auto07[x] = (auto07[x] + g2mx)
+        for i in range(len(self.aguas)):
+            for j in range(len(self.aguas[i])):
+                if self.aguas[i][j] >= 990:
+                    self.aguas[i][j] = -100
+                else:
+                    self.aguas[i][j] += self.velocidades[f"g{i % 3 + 1}mx"]
 
-        #Cosas en el Agua
-        for x in range(0,len(agua01)):
-            if agua01[x] <= -100:
-                agua01[x] = 990
-            else:
-                agua01[x] = (agua01[x] + g3mx)
-        for x in range(0,len(agua02)):
-            if agua02[x] >= 990:
-                agua02[x] = -100
-            else:
-                agua02[x] = (agua02[x] + g2mx)
-        for x in range(0,len(agua03)):
-            if agua03[x] <= -100:
-                agua03[x] = 990
-            else:
-                agua03[x] = (agua03[x] + g3mx)
-        for x in range(0,len(agua04)):
-            if agua04[x] >= 990:
-                agua04[x] = -100
-            else:
-                agua04[x] = (agua04[x] + g1mx)
-        for x in range(0,len(agua05)):
-            if agua05[x] <= -100:
-                agua05[x] = 990
-            else:
-                agua05[x] = (agua05[x] + g3mx)
-        for x in range(0,len(agua06)):
-            if agua06[x] >= 990:
-                agua06[x] = -100
-            else:
-                agua06[x] = (agua06[x] + g1mx)
-        for x in range(0,len(agua07)):
-            if agua07[x] <= -100:
-                agua07[x] = 990
-            else:
-                agua07[x] = (agua07[x] + g3mx)
-        for x in range(0,len(agua08)):
-            if agua08[x] >= 990:
-                agua08[x] = -100
-            else:
-                agua08[x] = (agua08[x] + g2mx)
-        
-
-        #PINTAR FONDO
+    def render(self):
+        # Pintar fondo
         areajuego.fill(fondo)
-        #PINTAR Marco y cosas fijas
-        #Marco
+        # Pintar marco y cosas fijas
         pygame.draw.rect(areajuego, marco, [0, 0, pantallaw, 50])
         pygame.draw.rect(areajuego, marco, [0, 950, pantallaw, 50])
-        #Veredas
         pygame.draw.rect(areajuego, vereda, [0, 500, pantallaw, 50])
         pygame.draw.rect(areajuego, vereda, [0, 900, pantallaw, 50])
-        #Selva
         pygame.draw.rect(areajuego, selva, [0, 50, pantallaw, 50])
-        #Agua
         pygame.draw.rect(areajuego, agua, [0, 100, pantallaw, 400])
 
+        message_display(f"Ciclos restantes: {self.ciclos}", 300, 975)
+        message_display(f"Puntaje de Crockis salvados: {self.puntaje}", 300, 25)
 
-        message_display("Ciclos restantes: "+str(ciclos),300,975)
-        message_display("Puntaje de Crockis salvados: "+str(puntaje),300,25)
+        for y, fila in zip(self.agua_pos_y, self.aguas):
+            for x in fila:
+                areajuego.blit(tortuga_img if y % 2 == 0 else arbol_img, (x, y))
 
-        for a in agua01:
-            areajuego.blit(tortuga,(a,agua01y))
-        for a in agua02:
-            areajuego.blit(arbol,(a,agua02y))
-        for a in agua03:
-            areajuego.blit(tortuga,(a,agua03y))
-        for a in agua04:
-            areajuego.blit(arbol,(a,agua04y))
-        for a in agua05:
-            areajuego.blit(tortuga,(a,agua05y))
-        for a in agua06:
-            areajuego.blit(arbol,(a,agua06y))
-        for a in agua07:
-            areajuego.blit(tortuga,(a,agua07y))
-        for a in agua08:
-            areajuego.blit(arbol,(a,agua08y))
-        
-        areajuego.blit(crocki,(jposx,jposy))
+        for y, fila in zip(self.auto_pos_y, self.autos):
+            for x in fila:
+                areajuego.blit(carr_img if y % 2 == 0 else carl_img, (x, y))
 
-        for a in auto01:
-            areajuego.blit(carr,(a,auto01y))
-        for a in auto02:
-            areajuego.blit(carl,(a,auto02y))
-        for a in auto03:
-            areajuego.blit(carl,(a,auto03y))
-        for a in auto04:
-            areajuego.blit(carr,(a,auto04y))
-        for a in auto05:
-            areajuego.blit(carr,(a,auto05y))
-        for a in auto06:
-            areajuego.blit(carl,(a,auto06y))
-        for a in auto07:
-            areajuego.blit(carr,(a,auto07y))
+        areajuego.blit(crocki_img, (self.jposx, self.jposy))
 
-        for a in crockis:
-            areajuego.blit(crocki,(a,50))
-        
-        
+        for a in self.crockis:
+            areajuego.blit(crocki_img, (a, 50))
 
-
-
-        #Mostrar todo
         pygame.display.update()
-        gametimer.tick(60)
-        ciclos = ciclos-1
-        if ciclos == 0:
-            termino = True
-    if puntaje == 0:
-        ciclos = 0
-    return ciclos+puntaje
 
+    def game_loop(self):
+        while not self.termino:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    self.termino = True
+                if event.type == pygame.KEYDOWN:
+                    if event.key == pygame.K_0:
+                        self.termino = True
+                    if event.key == pygame.K_LEFT:
+                        self.jposx = max(0, self.jposx - 50)
+                    if event.key == pygame.K_RIGHT:
+                        self.jposx = min(950, self.jposx + 50)
+                    if event.key == pygame.K_UP:
+                        self.jposy = max(50, self.jposy - 50)
+                    if event.key == pygame.K_DOWN:
+                        self.jposy = min(900, self.jposy + 50)
+
+            self.detectar_colisiones()
+
+            if self.jposy == 50:
+                self.puntaje += 20000
+                self.jposy = 900
+                self.crockis.append(self.jposx)
+
+            self.actualizar_posiciones()
+            self.render()
+
+            self.gametimer.tick(60)
+            self.ciclos -= 1
+            if self.ciclos == 0:
+                self.termino = True
+
+        if self.puntaje == 0:
+            self.ciclos = 0
+
+        return self.ciclos + self.puntaje
 
 def main():
-    #Cuerpo del programa que llama al juego
+    # Cuerpo del programa que llama al juego
     areajuego.fill(fondo)
-    score = game_loop()
+    game = Game()
+    score = game.game_loop()
 
     time.sleep(4)
     areajuego.fill(fondo)
-    for a in crockis:
-        areajuego.blit(crocki,(a,50))
-    message_display("Puntaje total: "+str(score),300,450)
-    pygame.display.update()
-    print("Tu score fue: ",score)
-    time.sleep(4)
+    for a in range(5):
+        message_display('Game Over', 500, 200)
+        message_display(f'Tu score es: {score}', 500, 500)
+        pygame.display.update()
+        time.sleep(1)
     pygame.quit()
-    quit()
-
 
 
 if __name__ == "__main__":
